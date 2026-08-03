@@ -13,7 +13,6 @@ declare module 'fastify' {
  * de produção.
  */
 export const pluginDeBanco = fp(
-  // eslint-disable-next-line @typescript-eslint/require-await
   async (app, opcoes: { banco: Banco }) => {
     app.decorate('banco', opcoes.banco);
 

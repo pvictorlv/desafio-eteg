@@ -20,7 +20,6 @@ function responder(resposta: FastifyReply, problema: Problema): FastifyReply {
  * formato de erro diferente.
  */
 export const pluginDeErros = fp(
-  // eslint-disable-next-line @typescript-eslint/require-await
   async (app) => {
     app.setErrorHandler((erro: FastifyError, requisicao, resposta) => {
       // 1. Falha de validação do corpo: devolve campo a campo, para o

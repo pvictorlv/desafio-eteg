@@ -33,6 +33,15 @@ export default tseslint.config(
     },
   },
   {
+    // Plugins e rotas do Fastify precisam ser async por contrato da
+    // biblioteca, mesmo quando o corpo nao tem await. Nao ha o que corrigir
+    // no codigo, entao a regra sai so nesses diretorios.
+    files: ['apps/api/src/rotas/**/*.ts', 'apps/api/src/plugins/**/*.ts'],
+    rules: {
+      '@typescript-eslint/require-await': 'off',
+    },
+  },
+  {
     // Arquivos de configuracao rodam fora do escopo de tipos dos pacotes.
     files: ['**/*.config.{js,ts}', '**/*.config.*.{js,ts}'],
     ...tseslint.configs.disableTypeChecked,

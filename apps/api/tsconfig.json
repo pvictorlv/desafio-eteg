@@ -1,9 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
-    "types": ["node"]
+    "types": ["node"],
+    "noEmit": true
   },
-  "include": ["src/**/*.ts"]
+  // Inclui o que é código de apoio (seed, config do Prisma) para o editor e o
+  // ESLint enxergarem tudo. O que vai para dist está em tsconfig.build.json.
+  "include": ["src/**/*.ts", "prisma/**/*.ts", "prisma.config.ts"]
 }

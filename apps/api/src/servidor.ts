@@ -8,6 +8,7 @@ import {
 import type { Ambiente } from './config/ambiente.js';
 import type { Banco } from './infra/banco.js';
 import { pluginDeBanco } from './plugins/banco.js';
+import { pluginDeDocumentacao } from './plugins/documentacao.js';
 import { pluginDeErros } from './plugins/erros.js';
 import { pluginDeObservabilidade } from './plugins/observabilidade.js';
 import { pluginDeSeguranca } from './plugins/seguranca.js';
@@ -78,6 +79,10 @@ export async function criarServidor({ ambiente, banco }: OpcoesDoServidor) {
   await app.register(pluginDeErros);
   await app.register(pluginDeSeguranca, { ambiente });
   await app.register(pluginDeBanco, { banco });
+
+  // Precisa vir antes das rotas: é registrando-se primeiro que o swagger
+  // consegue coletar os esquemas de cada uma.
+  await app.register(pluginDeDocumentacao);
 
   // Composition root: as dependências são montadas aqui e injetadas nas
   // rotas. Nenhuma camada instancia a de baixo por conta própria, o que

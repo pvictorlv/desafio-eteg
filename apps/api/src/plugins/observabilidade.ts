@@ -5,7 +5,6 @@ import { ErroDeNegocio } from '../servicos/erros.js';
 const CABECALHO_DE_CORRELACAO = 'x-request-id';
 
 export const pluginDeObservabilidade = fp(
-  // eslint-disable-next-line @typescript-eslint/require-await
   async (app) => {
     // Devolve o id da requisição para quem chamou. Sem isso, o usuário relata
     // "deu erro" e não há como ligar o relato a uma linha de log.
