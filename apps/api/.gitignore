@@ -1,0 +1,5 @@
+node_modules
+.env
+
+# Cliente gerado pelo Prisma: sai do `prisma generate`, nao do repositorio.
+src/generated

@@ -1,0 +1,22 @@
+services:
+  banco:
+    image: postgres:17-alpine
+    container_name: eteg-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-eteg}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eteg}
+      POSTGRES_DB: ${POSTGRES_DB:-eteg}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - dados-postgres:/var/lib/postgresql/data
+    healthcheck:
+      # A API depende disso para nao subir antes do banco aceitar conexao.
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-eteg} -d ${POSTGRES_DB:-eteg}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  dados-postgres:
