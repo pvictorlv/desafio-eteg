@@ -7,7 +7,10 @@ import {
 import type { Ambiente } from './config/ambiente.js';
 import type { Banco } from './infra/banco.js';
 import { pluginDeBanco } from './plugins/banco.js';
+import { criarRepositorioDeCores } from './repositorios/cores.js';
+import { rotasDeCores } from './rotas/cores.js';
 import { rotasDeSaude } from './rotas/saude.js';
+import { criarServicoDeCores } from './servicos/cores.js';
 
 export interface OpcoesDoServidor {
   ambiente: Ambiente;
@@ -40,7 +43,13 @@ export async function criarServidor({ ambiente, banco }: OpcoesDoServidor) {
 
   await app.register(pluginDeBanco, { banco });
 
+  // Composition root: as dependências são montadas aqui e injetadas nas
+  // rotas. Nenhuma camada instancia a de baixo por conta própria, o que
+  // deixa qualquer uma substituível em teste.
+  const servicoDeCores = criarServicoDeCores(criarRepositorioDeCores(banco));
+
   await app.register(rotasDeSaude);
+  await app.register(rotasDeCores, { servicoDeCores });
 
   return app;
 }
