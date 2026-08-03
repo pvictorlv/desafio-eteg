@@ -38,6 +38,9 @@ export function criarRepositorioDeClientes(banco: Banco): RepositorioDeClientes 
   };
 }
 
+/** Ordem importa: o CPF é checado primeiro por ser a chave mais forte. */
+const CAMPOS_UNICOS: readonly CampoUnico[] = ['cpf', 'email'];
+
 /**
  * Descobre a duplicidade pelo erro do banco em vez de consultar antes de
  * inserir.
@@ -55,18 +58,16 @@ function identificarCampoDuplicado(erro: unknown): CampoUnico | null {
     return null;
   }
 
-  // `meta.target` varia conforme o driver: às vezes traz os campos
-  // (['cpf']), às vezes o nome do índice ('clientes_cpf_key'). Procurar o
-  // nome do campo dentro dele cobre as duas formas.
-  const alvo = JSON.stringify(erro.meta?.['target'] ?? '');
+  // Onde fica o nome do campo depende de como o Prisma acessa o banco:
+  //
+  //   engine binária    -> meta.target = ['cpf']
+  //   driver adapter    -> meta.driverAdapterError.cause.originalMessage,
+  //                        contendo o nome do índice ('clientes_cpf_key')
+  //
+  // Procurar em todo o meta cobre as duas formas e sobrevive a mais uma
+  // mudança dessas. `modelName` é o único outro campo presente e não colide
+  // com nenhum nome de coluna nossa.
+  const detalhes = JSON.stringify(erro.meta ?? {});
 
-  if (alvo.includes('cpf')) {
-    return 'cpf';
-  }
-
-  if (alvo.includes('email')) {
-    return 'email';
-  }
-
-  return null;
+  return CAMPOS_UNICOS.find((campo) => detalhes.includes(campo)) ?? null;
 }
