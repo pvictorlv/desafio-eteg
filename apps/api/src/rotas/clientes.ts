@@ -12,6 +12,9 @@ export const rotasDeClientes: FastifyPluginAsyncZod<{
   app.post(
     '/api/clientes',
     {
+      // Limite mais apertado que o global: é escrita, é pública e um cliente
+      // legítimo envia o formulário uma vez só.
+      config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
       schema: {
         summary: 'Cadastra um cliente',
         description:

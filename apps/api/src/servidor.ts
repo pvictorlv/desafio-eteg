@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import Fastify from 'fastify';
 import {
   serializerCompiler,
@@ -8,6 +9,8 @@ import type { Ambiente } from './config/ambiente.js';
 import type { Banco } from './infra/banco.js';
 import { pluginDeBanco } from './plugins/banco.js';
 import { pluginDeErros } from './plugins/erros.js';
+import { pluginDeObservabilidade } from './plugins/observabilidade.js';
+import { pluginDeSeguranca } from './plugins/seguranca.js';
 import { criarRepositorioDeClientes } from './repositorios/clientes.js';
 import { criarRepositorioDeCores } from './repositorios/cores.js';
 import { rotasDeClientes } from './rotas/clientes.js';
@@ -30,14 +33,40 @@ export async function criarServidor({ ambiente, banco }: OpcoesDoServidor) {
   const app = Fastify({
     logger: {
       level: ambiente.NIVEL_DE_LOG,
+      // Nome completo, CPF e e-mail são dados pessoais (LGPD). Log costuma
+      // sair da máquina — vai para agregador, backup, ticket de suporte — e
+      // uma vez lá, some com dificuldade. Redação na origem é mais barata
+      // que política de retenção.
+      redact: {
+        paths: [
+          'req.headers.authorization',
+          'req.headers.cookie',
+          '*.cpf',
+          '*.email',
+          '*.nomeCompleto',
+          '*.observacoes',
+        ],
+        censor: '[oculto]',
+      },
       transport:
         ambiente.NODE_ENV === 'development'
           ? { target: 'pino-pretty', options: { translateTime: 'HH:MM:ss', ignore: 'pid,hostname' } }
           : undefined,
     },
+    // Reaproveita o id que o proxy já criou, quando existir: é o que permite
+    // seguir uma requisição do balanceador até a linha de log da aplicação.
+    genReqId: (requisicao) => {
+      const informado = requisicao.headers['x-request-id'];
+      return typeof informado === 'string' && informado.length > 0
+        ? informado
+        : randomUUID();
+    },
     // Cadastro é um payload pequeno; aceitar megabytes só amplia a superfície
     // de ataque.
     bodyLimit: 32 * 1024,
+    // Só confia em X-Forwarded-For onde de fato existe um proxy na frente.
+    // Confiar sempre permitiria forjar o IP e furar o rate limit.
+    trustProxy: ambiente.NODE_ENV === 'production',
   }).withTypeProvider<ZodTypeProvider>();
 
   // Faz o Fastify usar os esquemas Zod tanto para validar a entrada quanto
@@ -45,7 +74,9 @@ export async function criarServidor({ ambiente, banco }: OpcoesDoServidor) {
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
+  await app.register(pluginDeObservabilidade);
   await app.register(pluginDeErros);
+  await app.register(pluginDeSeguranca, { ambiente });
   await app.register(pluginDeBanco, { banco });
 
   // Composition root: as dependências são montadas aqui e injetadas nas

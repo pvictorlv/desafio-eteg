@@ -1,10 +1,21 @@
 import { carregarAmbiente } from './config/ambiente.js';
 import { criarConexao } from './infra/banco.js';
+import { iniciarMonitoramento } from './infra/monitoramento.js';
 import { criarServidor } from './servidor.js';
 
 const ambiente = carregarAmbiente();
+
+// Antes de qualquer coisa: se a aplicação quebrar durante a montagem, é este
+// o caminho que vai reportar.
+const monitoramentoAtivo = iniciarMonitoramento(ambiente);
+
 const banco = criarConexao(ambiente.DATABASE_URL);
 const app = await criarServidor({ ambiente, banco });
+
+app.log.info(
+  { ambiente: ambiente.NODE_ENV, monitoramentoAtivo },
+  'Aplicação montada',
+);
 
 /**
  * Encerramento gracioso: o orquestrador manda SIGTERM e espera. Sem isso, as
