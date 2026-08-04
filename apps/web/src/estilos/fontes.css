@@ -1,0 +1,25 @@
+/*
+ * Fontes servidas pelo próprio bundle, não por um CDN.
+ *
+ * Não é preferência: o helmet da API define `default-src 'self'`, então uma
+ * fonte hospedada fora da origem seria bloqueada em produção. Empacotar
+ * também evita o salto de layout de esperar um domínio de terceiro.
+ *
+ * Da Fraunces vem só o eixo WONK (36 kB no subconjunto latino) em vez do
+ * arquivo com todos os eixos (121 kB). WONK é o que dá as terminações
+ * inclinadas que fazem a fonte não parecer uma serifada qualquer.
+ */
+@import '@fontsource-variable/fraunces/wonk.css';
+@import '@fontsource-variable/karla/wght.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';
+
+:root {
+  /* Títulos: serifada de contraste alto, para o peso editorial. */
+  --fonte-titulo: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+
+  /* Texto e formulário: grotesca de leitura confortável em corpo pequeno. */
+  --fonte-texto: 'Karla Variable', 'Segoe UI', system-ui, sans-serif;
+
+  /* Dígitos e códigos: CPF, hex e protocolo alinham melhor em monoespaçada. */
+  --fonte-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Mono', monospace;
+}

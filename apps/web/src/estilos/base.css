@@ -1,0 +1,215 @@
+/*
+ * Fundamentos: reset, paleta e escalas. Nada aqui conhece um componente
+ * específico — o que é de layout mora em layout.css e o que é de formulário
+ * em formulario.css.
+ *
+ * A direção visual é papel e tinta: fundo de papel quente, texto quase preto
+ * e nenhuma cor decorativa. As únicas cores da tela são as sete do arco-íris,
+ * e elas vêm da API, não daqui. É o que mantém a interface honesta quando a
+ * lista de cores mudar.
+ */
+
+/* ---------------------------------------------------------------- paleta */
+
+:root {
+  color-scheme: light dark;
+
+  --papel: #f1eee5;
+  --superficie: #fbf9f4;
+  --tinta: #16130d;
+  --tinta-media: #5c5647;
+  --tinta-fraca: #67614f;
+  --linha: #d9d3c4;
+  /* Borda de controle de formulário. Mais escura que `--linha` porque a régua
+     decorativa pode ser sutil, mas a borda de um campo é o que diz onde ele
+     começa: a WCAG 1.4.11 pede 3:1 contra o fundo, e `--linha` dá 1,4:1. */
+  --contorno-campo: #8e8775;
+  --sombra: rgb(22 19 13 / 10%);
+  --realce: rgb(22 19 13 / 5%);
+
+  --critico: #a3271c;
+  --critico-suave: rgb(163 39 28 / 8%);
+  --positivo: #1c6444;
+
+  /* Tipografia --------------------------------------------------------- */
+
+  --corpo-titulo: clamp(2.9rem, 7.5vw, 5.25rem);
+  --corpo-secao: clamp(1.5rem, 3vw, 2rem);
+  --corpo-destaque: 1.125rem;
+  --corpo-base: 1rem;
+  --corpo-apoio: 0.875rem;
+  --corpo-etiqueta: 0.7rem;
+
+  /* Espaçamento — escala de 4 px, nomeada pelo uso e não pelo tamanho. */
+
+  --gap-micro: 0.25rem;
+  --gap-curto: 0.5rem;
+  --gap-campo: 1rem;
+  --gap-bloco: 1.75rem;
+  --gap-secao: 3rem;
+  --gap-pagina: clamp(1.5rem, 5vw, 4.5rem);
+
+  /* Movimento ---------------------------------------------------------- */
+
+  --curva: cubic-bezier(0.22, 1, 0.36, 1);
+  --duracao-curta: 180ms;
+  --duracao-media: 420ms;
+  --duracao-longa: 640ms;
+
+  --largura-maxima: 78rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --papel: #100e0a;
+    --superficie: #1a1710;
+    --tinta: #efeae0;
+    --tinta-media: #a9a08c;
+    --tinta-fraca: #8e8674;
+    --linha: #322c21;
+    --contorno-campo: #706a5a;
+    --sombra: rgb(0 0 0 / 45%);
+    --realce: rgb(239 234 224 / 6%);
+
+    --critico: #ff9184;
+    --critico-suave: rgb(255 145 132 / 10%);
+    --positivo: #6cc79b;
+  }
+}
+
+/* ----------------------------------------------------------------- reset */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  background-color: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fonte-texto);
+  font-size: var(--corpo-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+textarea,
+button,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background-color: var(--tinta);
+  color: var(--papel);
+}
+
+/* -------------------------------------------------------------- tipografia */
+
+h1,
+h2,
+h3 {
+  font-family: var(--fonte-titulo);
+  font-weight: 400;
+  /* WONK inclina as terminações; opsz ajusta o contraste ao corpo grande. */
+  font-variation-settings:
+    'WONK' 1,
+    'opsz' 60;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* --------------------------------------------------------------- utilidades */
+
+/* Visível para leitor de tela, invisível na tela. Usado nas legendas que a
+   estrutura semântica exige mas o desenho já comunica. */
+.apenas-leitor-de-tela {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.etiqueta {
+  font-family: var(--fonte-mono);
+  font-size: var(--corpo-etiqueta);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tinta-fraca);
+}
+
+/* ---------------------------------------------------------------- foco */
+
+/* Anel único para toda a interface: contorno de tinta afastado do elemento,
+   que aparece sobre papel, sobre a superfície e sobre qualquer amostra de
+   cor — inclusive o amarelo, onde um anel branco sumiria. */
+:focus-visible {
+  outline: 2px solid var(--tinta);
+  outline-offset: 3px;
+}
+
+/* -------------------------------------------------------------- movimento */
+
+@keyframes surgir {
+  from {
+    opacity: 0;
+    transform: translateY(0.875rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A entrada é escalonada pelo `animation-delay` que cada elemento define em
+   linha (ver estilos/movimento.ts). Um único carregamento coreografado rende
+   mais que microanimações espalhadas pela tela. */
+.surgir {
+  animation: surgir var(--duracao-longa) var(--curva) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

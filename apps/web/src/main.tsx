@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import './estilos/fontes.css';
+import './estilos/base.css';
 
 const raiz = document.getElementById('raiz');
 
