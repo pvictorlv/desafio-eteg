@@ -94,6 +94,13 @@ export function FormularioDeCadastro({ aoEscolherCor, aoConcluir }: PropsDoFormu
         }
       }}
       onSubmit={(evento) => {
+        // O botão continua habilitado durante o envio (ver o `aria-disabled`
+        // lá embaixo), então é aqui que o segundo clique morre.
+        if (cadastro.isPending) {
+          evento.preventDefault();
+          return;
+        }
+
         // `void` porque o onSubmit do DOM não espera promessa; a falha do
         // envio é tratada no `onError` da mutação, não aqui.
         void handleSubmit((dados) => {
@@ -197,9 +204,22 @@ export function FormularioDeCadastro({ aoEscolherCor, aoConcluir }: PropsDoFormu
       </Campo>
 
       <div className="formulario__acoes">
-        <button type="submit" className="botao" disabled={cadastro.isPending}>
+        {/* `aria-disabled` e não `disabled`: desabilitar um elemento que está
+            com o foco faz o navegador devolver o foco ao body. Quem enviou
+            pelo teclado perderia o lugar exatamente durante a espera, que é
+            quando mais precisa saber onde está. O envio duplo é barrado no
+            `onSubmit`. */}
+        <button type="submit" className="botao" aria-disabled={cadastro.isPending}>
           {cadastro.isPending ? 'Enviando…' : 'Enviar cadastro'}
         </button>
+
+        {/* O rótulo do botão muda para "Enviando…", mas trocar o nome
+            acessível do elemento em foco não é anunciado de forma confiável.
+            Esta região diz em voz alta o que a mudança de rótulo diz na tela. */}
+        <p className="apenas-leitor-de-tela" role="status">
+          {cadastro.isPending ? 'Enviando o cadastro…' : ''}
+        </p>
+
         <p className="formulario__aviso-legal">
           Cada CPF e cada e-mail podem ser cadastrados uma única vez.
         </p>

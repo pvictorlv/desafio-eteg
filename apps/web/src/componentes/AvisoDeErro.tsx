@@ -10,9 +10,9 @@ const ID_DO_TITULO = 'aviso-titulo';
  * onde mandar a pessoa: sem isso o foco continuaria no botão de enviar e a
  * explicação ficaria em algum lugar acima, fora da tela.
  *
- * E é foco *em vez* de `role="alert"`, não os dois. Mover o foco para dentro
- * de uma região assertiva no instante em que ela é anunciada faz o leitor de
- * tela repetir ou cortar a mensagem; o próprio foco já garante a leitura.
+ * E é foco *em vez* de `role="alert"`, não os dois. Mandar o foco para um
+ * trecho que o leitor de tela está anunciando naquele instante faz ele repetir
+ * ou cortar a mensagem; o próprio foco já garante que ela seja lida.
  */
 export function AvisoDeErro({ mensagem }: { mensagem: string }) {
   const referencia = useRef<HTMLDivElement>(null);

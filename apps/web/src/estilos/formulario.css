@@ -244,12 +244,15 @@
     box-shadow var(--duracao-curta) var(--curva);
 }
 
-.botao:hover:not(:disabled) {
+/* `aria-disabled` entra junto de `:disabled` em toda regra: o botão de envio
+   usa o atributo ARIA para não perder o foco enquanto espera (ver
+   FormularioDeCadastro.tsx), e continuaria com aparência de ativo sem isto. */
+.botao:hover:not(:disabled, [aria-disabled='true']) {
   transform: translate(-1px, -1px);
   box-shadow: 5px 5px 0 var(--sombra);
 }
 
-.botao:active:not(:disabled) {
+.botao:active:not(:disabled, [aria-disabled='true']) {
   transform: translate(2px, 2px);
   box-shadow: 1px 1px 0 var(--sombra);
 }
@@ -258,7 +261,8 @@
    progresso da tela, e precisa ser legível. `opacity` no elemento inteiro
    compunha o texto e o fundo juntos e derrubava o contraste para 3,8:1;
    trocar só a cor de fundo mantém 6,3:1. */
-.botao:disabled {
+.botao:disabled,
+.botao[aria-disabled='true'] {
   background-color: var(--tinta-media);
   border-color: var(--tinta-media);
   cursor: progress;
@@ -273,7 +277,7 @@
   padding: 0.5rem 1rem;
 }
 
-.botao--discreto:hover:not(:disabled) {
+.botao--discreto:hover:not(:disabled, [aria-disabled='true']) {
   background-color: var(--realce);
   transform: none;
   box-shadow: none;

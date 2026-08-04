@@ -55,7 +55,15 @@ export function Campo({ id, rotulo, erro, dica, medidor, children }: PropsDoCamp
       ) : null}
 
       {/* `role="alert"` faz o leitor de tela anunciar a mensagem assim que ela
-          aparece, sem esperar o foco voltar ao campo. */}
+          aparece, sem esperar o foco voltar ao campo.
+
+          Aqui é alerta *e* foco, ao contrário do `AvisoDeErro`, que é foco em
+          vez de alerta. A diferença é deliberada: o aviso geral é sempre único
+          e sempre recebe o foco, então o alerta só duplicaria o anúncio. Num
+          envio inválido, ao contrário, vários campos erram de uma vez e só o
+          primeiro recebe o foco — sem o alerta, o erro dos outros ficaria mudo
+          até a pessoa tabular até lá. O preço é o primeiro campo ser anunciado
+          duas vezes; o silêncio nos demais é o erro mais caro. */}
       {erro ? (
         <p className="campo__erro" id={idDoErro} role="alert">
           {erro}
