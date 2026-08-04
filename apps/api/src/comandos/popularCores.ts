@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '../src/generated/prisma/client.js';
+import { PrismaClient } from '../generated/prisma/client.js';
 
 /**
  * As sete cores do arco-íris, na ordem do espectro. É só o ponto de partida:
@@ -16,6 +16,11 @@ const CORES_DO_ARCO_IRIS = [
   { slug: 'violeta', nome: 'Violeta', hex: '#8B00FF', ordem: 7 },
 ] as const;
 
+/**
+ * Vive em `src/` e não em `prisma/` para ser compilado junto com a aplicação:
+ * é assim que o container consegue rodá-lo com `node`, sem carregar um
+ * executor de TypeScript só para o passo de inicialização.
+ */
 async function popular(): Promise<void> {
   const connectionString = process.env['DATABASE_URL'];
 
@@ -27,8 +32,8 @@ async function popular(): Promise<void> {
 
   try {
     for (const cor of CORES_DO_ARCO_IRIS) {
-      // upsert por slug: o seed roda a cada deploy e não pode duplicar nem
-      // reverter uma cor que alguém tenha desativado de propósito.
+      // upsert por slug: roda a cada deploy e não pode duplicar nem reverter
+      // uma cor que alguém tenha desativado de propósito.
       await prisma.cor.upsert({
         where: { slug: cor.slug },
         update: { nome: cor.nome, hex: cor.hex, ordem: cor.ordem },
@@ -37,7 +42,7 @@ async function popular(): Promise<void> {
     }
 
     const total = await prisma.cor.count();
-    console.log(`Seed concluído: ${total} cores disponíveis.`);
+    console.log(`Cores disponíveis: ${total}.`);
   } finally {
     await prisma.$disconnect();
   }

@@ -1,0 +1,37 @@
+# O contexto de build é o repositório inteiro; o que não entra na imagem não
+# precisa nem ser enviado ao daemon.
+node_modules
+**/node_modules
+**/dist
+**/build
+# Cliente do Prisma: a imagem gera o seu, contra a mesma plataforma onde roda.
+**/generated
+
+# Testes e artefatos de teste: a imagem carrega a aplicação, não a suíte.
+**/testes
+e2e
+# Menos o manifesto: `pnpm install --frozen-lockfile` confere todos os
+# projetos declarados no pnpm-workspace.yaml, inclusive o de e2e.
+!e2e/package.json
+test-results
+playwright-report
+coverage
+
+# Segredos e configuração local. `DATABASE_URL` chega por variável de
+# ambiente, nunca assada na imagem.
+**/.env
+**/.env.*
+!**/.env.example
+
+.git
+.github
+.claude
+.serena
+.vscode
+docs
+*.md
+!README.md
+desafio.pdf
+vaga.txt
+commitar.sh
+msg.txt
