@@ -1,0 +1,189 @@
+/*
+ * Composição da página: régua de cores, coluna editorial e painel do
+ * formulário. As duas colunas são assimétricas de propósito — o formulário
+ * é o que a pessoa veio fazer, então fica com o lado maior.
+ */
+
+.pagina {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.pagina__corpo {
+  flex: 1;
+  width: 100%;
+  max-width: var(--largura-maxima);
+  margin-inline: auto;
+  padding: var(--gap-pagina);
+  display: grid;
+  gap: var(--gap-secao);
+  align-items: start;
+}
+
+@media (width >= 62rem) {
+  .pagina__corpo {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+    gap: clamp(3rem, 7vw, 6.5rem);
+    padding-block: clamp(4rem, 9vh, 7rem);
+  }
+
+  .abertura {
+    /* Acompanha a rolagem do formulário, que é bem mais alto. */
+    position: sticky;
+    top: clamp(4rem, 9vh, 7rem);
+  }
+}
+
+/* ------------------------------------------------------------- espectro */
+
+.espectro {
+  display: flex;
+  align-items: flex-start;
+  height: 0.875rem;
+  /* Ocupa a largura toda da janela, sem respeitar a caixa da página: é a
+     primeira coisa que se vê e funciona como cabeçalho da marca. */
+  width: 100%;
+}
+
+.espectro[data-carregando] {
+  background-color: var(--linha);
+  height: 0.375rem;
+}
+
+.espectro__faixa {
+  flex: 1 1 0;
+  height: 0.375rem;
+  transform-origin: left center;
+  animation-name: desdobrar;
+  transition:
+    flex-grow var(--duracao-media) var(--curva),
+    height var(--duracao-media) var(--curva),
+    opacity var(--duracao-media) var(--curva);
+}
+
+.espectro__faixa[data-estado='destacada'] {
+  flex-grow: 2.6;
+  height: 0.875rem;
+}
+
+.espectro__faixa[data-estado='apagada'] {
+  opacity: 0.28;
+}
+
+@keyframes desdobrar {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+/* -------------------------------------------------------------- abertura */
+
+.abertura {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-campo);
+}
+
+.abertura__titulo {
+  font-size: var(--corpo-titulo);
+  font-variation-settings:
+    'WONK' 1,
+    'opsz' 144;
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  line-height: 0.94;
+  margin-block: var(--gap-curto) var(--gap-micro);
+}
+
+.abertura__resumo {
+  max-width: 34ch;
+  font-size: var(--corpo-destaque);
+  color: var(--tinta-media);
+  line-height: 1.55;
+}
+
+/* -------------------------------------------------- eco da cor escolhida */
+
+.eco {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-campo);
+  margin-top: var(--gap-bloco);
+  padding-top: var(--gap-bloco);
+  border-top: 1px solid var(--linha);
+}
+
+.eco__amostra {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background-color var(--duracao-media) var(--curva);
+}
+
+.eco__amostra[data-vazia] {
+  border: 1.5px dashed var(--linha);
+}
+
+.eco__legenda {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.eco__nome {
+  font-family: var(--fonte-titulo);
+  font-size: var(--corpo-secao);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.eco__nome--vazio {
+  color: var(--tinta-fraca);
+  font-size: var(--corpo-destaque);
+}
+
+.eco__codigo {
+  font-family: var(--fonte-mono);
+  font-size: var(--corpo-apoio);
+  color: var(--tinta-fraca);
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------- painel */
+
+.painel {
+  background-color: var(--superficie);
+  border: 1px solid var(--linha);
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  /* Sombra dura, sem desfoque: o papel parece empilhado, não flutuando. */
+  box-shadow: 6px 6px 0 var(--sombra);
+}
+
+/* --------------------------------------------------------------- rodapé */
+
+.rodape {
+  border-top: 1px solid var(--linha);
+  padding: var(--gap-campo) var(--gap-pagina);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-curto) var(--gap-bloco);
+  justify-content: space-between;
+  color: var(--tinta-fraca);
+  font-size: var(--corpo-apoio);
+}
+
+.rodape a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+}
+
+.rodape a:hover {
+  color: var(--tinta);
+}

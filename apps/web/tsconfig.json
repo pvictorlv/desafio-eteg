@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // O bundler resolve os imports, então aqui vale ESNext + "bundler" em vez
+    // do NodeNext da base, que é a configuração da API.
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    // `node` é para o `process.env` do vite.config.ts. Vinha por resolução
+    // transitiva das tipagens do próprio Vite, o que compilava por acidente e
+    // quebraria num install limpo.
+    "types": ["vite/client", "node"],
+
+    // Quem emite é o Vite; o tsc aqui só checa tipos.
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  "include": ["src", "vite.config.ts"]
+}
