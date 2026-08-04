@@ -1,13 +1,40 @@
 # Cadastro de clientes
 
-Aplicação de cadastro de clientes construída para o desafio técnico da ETEG.
+Formulário público de cadastro, construído para o desafio técnico da ETEG.
 
-Um formulário coleta **nome completo, CPF, e-mail, cor preferida e observações**
-e grava em Postgres. Cada CPF e cada e-mail podem ser cadastrados **uma única
-vez**, e quem preenche recebe a confirmação na hora.
+Coleta **nome completo, CPF, e-mail, cor preferida e observações**, grava em
+Postgres e confirma na hora. Cada CPF e cada e-mail podem ser cadastrados
+**uma única vez** — garantia do banco, não da tela.
 
-> Estado atual: API e formulário web prontos. Faltam os testes automatizados e
-> a imagem Docker.
+Tudo sobe com um comando:
+
+```bash
+docker compose up --build
+```
+
+A aplicação fica em <http://localhost:8080> e a documentação da API em
+<http://localhost:8080/docs>. Não é preciso instalar Node, pnpm nem Postgres.
+
+## O caso de uso
+
+O enunciado é a carta de um cliente, e três frases dela decidiram o desenho:
+
+> "cor preferida (entre as cores disponíveis em um arco-íris, **isso pode
+> mudar posteriormente**)"
+
+As cores moram no banco, com endpoint próprio. Trocar o catálogo é um
+`INSERT`, sem deploy ([ADR 0005](docs/adr/0005-cores-como-dado.md)).
+
+> "um cliente consiga preencher o formulário **uma única vez**"
+
+Índice único em CPF e em e-mail. O `409` nasce da violação da constraint, não
+de uma consulta prévia — consultar antes deixa uma janela em que dois envios
+simultâneos passariam os dois ([ADR 0004](docs/adr/0004-unicidade-no-banco.md)).
+
+> "vai subir a **imagem** em um serviço terceirizado"
+
+Uma imagem só, servindo API e tela na mesma porta, com as migrações rodando no
+boot ([ADR 0006](docs/adr/0006-imagem-unica.md)).
 
 ## Stack
 
@@ -16,40 +43,63 @@ vez**, e quem preenche recebe a confirmação na hora.
 | Monorepo | pnpm workspaces             | Front, API e contrato no mesmo repositório, como o desafio pede     |
 | Contrato | Zod em `packages/contratos` | Uma regra de validação só, usada pelo formulário e pela API         |
 | API      | Fastify 5 + TypeScript      | Tipagem ponta a ponta nas rotas e OpenAPI gerado do próprio esquema |
-| Front    | React 19 + Vite             | SPA estática, que a própria API vai servir em produção              |
+| Front    | React 19 + Vite             | SPA estática, que a própria API serve em produção                   |
 | Formul.  | React Hook Form + Zod       | O resolver é o mesmo esquema que a rota valida                      |
 | Dados    | TanStack Query              | Cache das cores e controle do envio, sem repetição automática       |
 | Banco    | Postgres 17 + Prisma 7      | Migrações versionadas; a versão 7 dispensa engine binária           |
+| Testes   | Vitest + Testcontainers     | Integração contra um Postgres real, e não contra um mock            |
+| E2E      | Playwright                  | O cadastro exercitado pelo navegador, sobre a imagem publicável     |
 
-## Como rodar
+O raciocínio de cada escolha, e o que se paga por ela, está em
+[docs/adr](docs/adr/README.md). A arquitetura e o fluxo do cadastro estão em
+[docs/arquitetura.md](docs/arquitetura.md).
 
-Requisitos: Node 24 (veja `.nvmrc`), pnpm 9 e um Postgres acessível.
+## Desenvolvimento
+
+Requisitos: Node 24 (veja `.nvmrc`), pnpm 9 e Docker.
 
 ```bash
 pnpm install
+pnpm build                      # compila os contratos e gera o cliente Prisma
 
-# Sobe um Postgres local já configurado
-docker compose up -d banco
+docker compose up -d banco      # um Postgres já configurado
 
 cd apps/api
 cp .env.example .env
-
-pnpm prisma:deploy   # aplica as migrações
-pnpm seed            # cadastra as sete cores do arco-íris
-pnpm dev             # API em http://localhost:3000
+pnpm prisma:deploy              # aplica as migrações
+pnpm seed                       # cadastra as sete cores do arco-íris
+pnpm dev                        # API em http://localhost:3000
 ```
 
 Com a API no ar, em outro terminal:
 
 ```bash
 cd apps/web
-pnpm dev             # formulário em http://localhost:5173
+pnpm dev                        # formulário em http://localhost:5173
 ```
 
 O Vite faz proxy de `/api` para a porta 3000, então o front chama a mesma
 origem que usará em produção e o navegador nem passa por CORS.
 
-A documentação interativa da API fica em <http://localhost:3000/docs>.
+> A porta 5432 costuma estar ocupada por um Postgres instalado na máquina.
+> Suba o container em outra: `POSTGRES_PORT=5433 docker compose up -d banco`,
+> ajustando o `DATABASE_URL` do `.env` para a mesma porta.
+
+## Variáveis de ambiente
+
+Todas são lidas e validadas uma vez, no boot. Faltando uma obrigatória, a
+aplicação não sobe — errar cedo e alto é melhor que descobrir no primeiro
+request, com o healthcheck já verde.
+
+| Variável             | Obrigatória | Padrão        | Para quê                                                       |
+| -------------------- | ----------- | ------------- | -------------------------------------------------------------- |
+| `DATABASE_URL`       | sim         | —             | Conexão com o Postgres                                         |
+| `PORT`               | não         | `3000`        | Porta HTTP                                                     |
+| `NODE_ENV`           | não         | `development` | `development` liga o log legível; `production` confia no proxy |
+| `ORIGENS_PERMITIDAS` | não         | vazio         | Origens liberadas no CORS. Vazio = só a mesma origem           |
+| `NIVEL_DE_LOG`       | não         | `info`        | `fatal` a `trace`                                              |
+| `DIRETORIO_DO_FRONT` | não         | —             | SPA compilada servida pela API. Preenchida na imagem           |
+| `SENTRY_DSN`         | não         | —             | Ausente, o envio de erros fica desligado                       |
 
 ## Endpoints
 
@@ -59,62 +109,78 @@ A documentação interativa da API fica em <http://localhost:3000/docs>.
 | `POST` | `/api/clientes` | Cadastra um cliente. `201` no sucesso, `409` se CPF ou e-mail já existem |
 | `GET`  | `/saude`        | Liveness: o processo está no ar                                          |
 | `GET`  | `/saude/pronto` | Readiness: o banco responde                                              |
-| `GET`  | `/docs`         | Documentação OpenAPI                                                     |
+| `GET`  | `/docs`         | Documentação OpenAPI, gerada dos mesmos esquemas Zod                     |
 
-Erros seguem [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) (`application/problem+json`)
-e trazem um `codigo` estável, para o front reagir sem interpretar texto.
+Erros seguem [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457)
+(`application/problem+json`) e trazem um `codigo` estável, para o cliente
+reagir sem interpretar texto. O catálogo está em
+[docs/erros.md](docs/erros.md).
 
-## Decisões que valem explicar
+## Testes
 
-**As cores ficam no banco, não em um enum.** O enunciado avisa que a lista "pode
-mudar posteriormente". Uma tabela com endpoint próprio permite mudar sem deploy.
+```bash
+pnpm build      # os testes usam os contratos compilados e o cliente Prisma
+pnpm test       # unitários, integração e componentes
+pnpm test:e2e   # navegador, com a aplicação já no ar
+```
 
-**A unicidade é do banco.** Índice único em `cpf` e em `email`; o `409` nasce da
-violação da constraint, não de uma consulta prévia. Consultar antes de inserir
-deixa uma janela em que dois envios simultâneos do mesmo CPF passariam os dois.
+| Onde                        | O que cobre                                                     |
+| --------------------------- | --------------------------------------------------------------- |
+| `packages/contratos`        | Validação de CPF e normalização dos campos                      |
+| `apps/api` (Testcontainers) | `201`, os dois `409`, `422` de validação e de cor, cores, saúde |
+| `apps/web` (jsdom)          | O formulário como a pessoa o usa, incluindo a recusa por CPF    |
+| `e2e` (Playwright)          | Cadastro, repetição do mesmo CPF e mensagem de duplicado        |
 
-**Validação escrita uma vez.** O mesmo esquema Zod valida o formulário e o corpo
-da requisição, e ainda gera a documentação. Não há como as duas pontas
-divergirem sem quebrar o build.
+A integração da API **exige Docker**: sobe um `postgres:17-alpine`
+descartável, aplica as migrações versionadas e roda contra ele. O `409` nasce
+do índice único, então um banco em memória testaria outra coisa.
 
-**Dado pessoal não vai para o log.** Nome, CPF e e-mail são redigidos na origem.
-Log sai da máquina; depois que vazou, some com dificuldade.
+O e2e roda contra a aplicação já no ar. Com o compose:
 
-**O front decide pelo `codigo`, não pelo texto.** Um `409` chega com o campo
-culpado no problem+json, e é esse campo que o formulário destaca. Procurar a
-palavra "CPF" na mensagem quebraria na primeira vez que alguém melhorasse a
-redação de um erro no servidor.
+```bash
+docker compose up -d --build
+URL_DA_APLICACAO=http://localhost:8080 pnpm test:e2e
+```
 
-**O envio não é repetido sozinho.** Leituras podem ser tentadas de novo depois
-de uma falha de rede; o cadastro, não. Uma repetição automática depois de um
-timeout grava duas vezes ou devolve um `409` que a pessoa não provocou.
+## Deploy
 
-## O formulário
+O `Dockerfile` produz **uma imagem** com API e tela. Ela aplica as migrações e
+garante as cores no boot, então subir é apontar para o banco:
 
-Uma tela só. O CPF ganha máscara enquanto se digita e viaja sem ela; as cores
-vêm de `GET /api/cores` e alimentam tanto os botões quanto a régua colorida do
-topo. Enviado com sucesso, o formulário **sai da tela** e dá lugar à
-confirmação com o protocolo — em vez de continuar preenchido, convidando a um
-segundo envio.
+```bash
+docker run -p 8080:3000 \
+  -e DATABASE_URL="postgresql://usuario:senha@host:5432/eteg" \
+  ghcr.io/pvictorlv/desafio-eteg:latest
+```
 
-Acessibilidade entra como requisito, não como enfeite: rótulo ligado a cada
-campo, erro anunciado por `role="alert"`, foco levado ao primeiro campo
-inválido, navegação por setas entre as cores, contraste conferido nos dois
-temas e movimento desligado para quem pede `prefers-reduced-motion`. A cor
-escolhida nunca é sinalizada só por cor — há anel e negrito junto.
+A imagem roda como usuário não-root e traz `HEALTHCHECK` apontando para
+`/saude` — o liveness, que não depende do banco: um Postgres fora do ar não
+deve fazer o orquestrador reiniciar uma aplicação que está de pé.
+
+Cada push na `main` publica no GHCR; tags `v*` publicam a versão semântica.
 
 ## Estrutura
 
 ```
 apps/api            API Fastify (rotas -> serviços -> repositórios)
-apps/web            SPA React (Vite), consome a API
+apps/web            SPA React (Vite), servida pela API em produção
 packages/contratos  Esquemas Zod e validação de CPF compartilhados
+e2e                 Playwright, sobre a aplicação já no ar
+docs/adr            Decisões de arquitetura
+docker              Entrypoint da imagem
 ```
 
-## Scripts
+## Acessibilidade
 
-```bash
-pnpm build       # compila todos os pacotes
-pnpm typecheck   # checagem de tipos
-pnpm lint        # ESLint com regras que usam informação de tipo
-```
+Entrou como requisito, não como enfeite: rótulo ligado a cada campo, erro
+anunciado por `role="alert"`, foco levado ao primeiro campo inválido,
+navegação por setas entre as cores, contraste conferido nos dois temas e
+movimento desligado para quem pede `prefers-reduced-motion`. A cor escolhida
+nunca é sinalizada só por cor — há anel e negrito junto.
+
+## O que ficou de fora
+
+Autenticação, edição e exclusão de cadastro, fila e multi-tenancy. O motivo de
+cada uma está em [docs/arquitetura.md](docs/arquitetura.md#o-que-ficou-de-fora-e-por-quê).
+Resumindo: nenhuma tem requisito no enunciado, e código sem quem sirva é
+código para manter de graça.
