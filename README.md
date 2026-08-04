@@ -10,12 +10,12 @@ vez**, e quem preenche recebe a confirmação na hora.
 
 ## Stack
 
-| Camada | Escolha | Por quê |
-| --- | --- | --- |
-| Monorepo | pnpm workspaces | Front, API e contrato no mesmo repositório, como o desafio pede |
-| Contrato | Zod em `packages/contratos` | Uma regra de validação só, usada pelo formulário e pela API |
-| API | Fastify 5 + TypeScript | Tipagem ponta a ponta nas rotas e OpenAPI gerado do próprio esquema |
-| Banco | Postgres 17 + Prisma 7 | Migrações versionadas; a versão 7 dispensa engine binária |
+| Camada   | Escolha                     | Por quê                                                             |
+| -------- | --------------------------- | ------------------------------------------------------------------- |
+| Monorepo | pnpm workspaces             | Front, API e contrato no mesmo repositório, como o desafio pede     |
+| Contrato | Zod em `packages/contratos` | Uma regra de validação só, usada pelo formulário e pela API         |
+| API      | Fastify 5 + TypeScript      | Tipagem ponta a ponta nas rotas e OpenAPI gerado do próprio esquema |
+| Banco    | Postgres 17 + Prisma 7      | Migrações versionadas; a versão 7 dispensa engine binária           |
 
 ## Como rodar
 
@@ -39,13 +39,13 @@ A documentação interativa fica em <http://localhost:3000/docs>.
 
 ## Endpoints
 
-| Método | Rota | O que faz |
-| --- | --- | --- |
-| `GET` | `/api/cores` | Lista as cores disponíveis. Cache de 5 minutos |
+| Método | Rota            | O que faz                                                                |
+| ------ | --------------- | ------------------------------------------------------------------------ |
+| `GET`  | `/api/cores`    | Lista as cores disponíveis. Cache de 5 minutos                           |
 | `POST` | `/api/clientes` | Cadastra um cliente. `201` no sucesso, `409` se CPF ou e-mail já existem |
-| `GET` | `/saude` | Liveness: o processo está no ar |
-| `GET` | `/saude/pronto` | Readiness: o banco responde |
-| `GET` | `/docs` | Documentação OpenAPI |
+| `GET`  | `/saude`        | Liveness: o processo está no ar                                          |
+| `GET`  | `/saude/pronto` | Readiness: o banco responde                                              |
+| `GET`  | `/docs`         | Documentação OpenAPI                                                     |
 
 Erros seguem [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) (`application/problem+json`)
 e trazem um `codigo` estável, para o front reagir sem interpretar texto.

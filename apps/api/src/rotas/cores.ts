@@ -13,8 +13,7 @@ export const rotasDeCores: FastifyPluginAsyncZod<{ servicoDeCores: ServicoDeCore
     {
       schema: {
         summary: 'Lista as cores disponíveis para escolha',
-        description:
-          'As cores vêm do banco, não de um enum: a lista pode mudar sem exigir deploy.',
+        description: 'As cores vêm do banco, não de um enum: a lista pode mudar sem exigir deploy.',
         tags: ['Cores'],
         response: { 200: esquemaListaDeCores },
       },

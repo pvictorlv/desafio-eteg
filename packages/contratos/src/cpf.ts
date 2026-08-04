@@ -39,8 +39,10 @@ export function validarCpf(valor: string): boolean {
 
   const digitos = Array.from(somenteDigitos, Number);
 
-  return calcularDigitoVerificador(digitos, 9) === digitos[9] &&
-    calcularDigitoVerificador(digitos, 10) === digitos[10];
+  return (
+    calcularDigitoVerificador(digitos, 9) === digitos[9] &&
+    calcularDigitoVerificador(digitos, 10) === digitos[10]
+  );
 }
 
 function calcularDigitoVerificador(digitos: readonly number[], quantidade: number): number {

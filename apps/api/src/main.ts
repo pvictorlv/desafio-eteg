@@ -12,10 +12,7 @@ const monitoramentoAtivo = iniciarMonitoramento(ambiente);
 const banco = criarConexao(ambiente.DATABASE_URL);
 const app = await criarServidor({ ambiente, banco });
 
-app.log.info(
-  { ambiente: ambiente.NODE_ENV, monitoramentoAtivo },
-  'Aplicação montada',
-);
+app.log.info({ ambiente: ambiente.NODE_ENV, monitoramentoAtivo }, 'Aplicação montada');
 
 /**
  * Encerramento gracioso: o orquestrador manda SIGTERM e espera. Sem isso, as

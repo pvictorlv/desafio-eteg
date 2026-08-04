@@ -28,11 +28,7 @@ export class ClienteJaCadastradoError extends ErroDeNegocio {
   override readonly campo: CampoUnico;
 
   constructor(campo: CampoUnico) {
-    super(
-      campo === 'cpf'
-        ? 'Este CPF já está cadastrado.'
-        : 'Este e-mail já está cadastrado.',
-    );
+    super(campo === 'cpf' ? 'Este CPF já está cadastrado.' : 'Este e-mail já está cadastrado.');
     this.campo = campo;
     this.codigo =
       campo === 'cpf' ? CODIGOS_DE_ERRO.CPF_JA_CADASTRADO : CODIGOS_DE_ERRO.EMAIL_JA_CADASTRADO;

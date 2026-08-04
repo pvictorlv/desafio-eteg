@@ -51,16 +51,17 @@ export async function criarServidor({ ambiente, banco }: OpcoesDoServidor) {
       },
       transport:
         ambiente.NODE_ENV === 'development'
-          ? { target: 'pino-pretty', options: { translateTime: 'HH:MM:ss', ignore: 'pid,hostname' } }
+          ? {
+              target: 'pino-pretty',
+              options: { translateTime: 'HH:MM:ss', ignore: 'pid,hostname' },
+            }
           : undefined,
     },
     // Reaproveita o id que o proxy já criou, quando existir: é o que permite
     // seguir uma requisição do balanceador até a linha de log da aplicação.
     genReqId: (requisicao) => {
       const informado = requisicao.headers['x-request-id'];
-      return typeof informado === 'string' && informado.length > 0
-        ? informado
-        : randomUUID();
+      return typeof informado === 'string' && informado.length > 0 ? informado : randomUUID();
     },
     // Cadastro é um payload pequeno; aceitar megabytes só amplia a superfície
     // de ataque.

@@ -1,2 +1,2 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# LF no repositorio e tambem no diretorio de trabalho, em qualquer sistema.
+* text=auto eol=lf
