@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Cadastro de clientes: nome, CPF, e-mail e cor preferida, em um formulário único."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#12100c" media="(prefers-color-scheme: dark)" />
+    <!--
+      Ícone embutido, e não um /favicon.ico: em produção a API serve estes
+      arquivos, então o pedido automático do navegador cairia no 404 dela,
+      geraria um problem+json e ainda gastaria uma unidade do rate limit a
+      cada carregamento. As sete faixas são as mesmas do topo da página.
+    -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7'%3E%3Crect width='1' height='7' x='0' fill='%23FF0000'/%3E%3Crect width='1' height='7' x='1' fill='%23FF7F00'/%3E%3Crect width='1' height='7' x='2' fill='%23FFD700'/%3E%3Crect width='1' height='7' x='3' fill='%2300A650'/%3E%3Crect width='1' height='7' x='4' fill='%230057B8'/%3E%3Crect width='1' height='7' x='5' fill='%233F00FF'/%3E%3Crect width='1' height='7' x='6' fill='%238B00FF'/%3E%3C/svg%3E"
+    />
+    <title>Cadastro de clientes</title>
+  </head>
+  <body>
+    <div id="raiz"></div>
+    <noscript>
+      Este formulário precisa de JavaScript habilitado para validar os dados e enviar o cadastro.
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
