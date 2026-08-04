@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Um push em cima do outro cancela a execução anterior: gastar minuto de
+# runner num commit que já foi substituído não ajuda ninguém.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualidade:
+    name: Formato, tipos, lint e testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          # A mesma versão do .nvmrc e da imagem: uma fonte só para o número.
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Antes dos testes: a API importa os contratos compilados e o cliente do
+      # Prisma gerado, exatamente como em produção.
+      - run: pnpm build
+
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+
+      # O Testcontainers usa o Docker que já vem no runner.
+      - run: pnpm test
+
+  e2e:
+    name: Cadastro pelo navegador
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # O teste sorteia um CPF com o validador do contrato compilado.
+      - run: pnpm --filter @desafio-eteg/contratos build
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Constrói fora do compose só para poder reaproveitar o cache do
+      # GitHub — o `--build` do compose refaz install e os três builds de
+      # TypeScript do zero a cada execução. A tag é a mesma que o compose
+      # espera, então o `up` abaixo encontra a imagem pronta.
+      - name: Constrói a imagem
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: desafio-eteg:local
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Sobe a imagem de verdade, e não o servidor de desenvolvimento: o que
+      # se quer provar é o artefato que vai para produção.
+      - name: Sobe a aplicação pelo compose
+        run: docker compose up -d
+
+      - name: Espera o container ficar saudável
+        run: |
+          for tentativa in $(seq 1 60); do
+            if [ "$(docker inspect eteg-app --format '{{.State.Health.Status}}')" = "healthy" ]; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose logs
+          exit 1
+
+      - run: pnpm --filter @desafio-eteg/e2e exec playwright install --with-deps chromium
+
+      - run: pnpm test:e2e
+        env:
+          URL_DA_APLICACAO: http://localhost:8080
+
+      - name: Guarda o relatório quando falha
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 7
+
+      - name: Mostra o log da aplicação quando falha
+        if: failure()
+        run: docker compose logs app

@@ -1,0 +1,38 @@
+version: 2
+
+updates:
+  # Um pull request por semana com as atualizações agrupadas. Um PR por
+  # pacote, todo dia, é ruído que o time aprende a ignorar — e aí a
+  # atualização de segurança passa despercebida junto.
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    groups:
+      producao:
+        dependency-type: production
+        update-types: [minor, patch]
+      desenvolvimento:
+        dependency-type: development
+        update-types: [minor, patch]
+    commit-message:
+      prefix: chore
+      include: scope
+
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+
+  - package-ecosystem: docker
+    directory: '/'
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: build
