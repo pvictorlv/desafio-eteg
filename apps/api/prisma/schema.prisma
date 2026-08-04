@@ -1,0 +1,46 @@
+// Convenção: nomes em camelCase no código, snake_case no banco (via @map).
+// Assim o TypeScript fica idiomático sem deixar o SQL estranho para quem
+// abrir o banco direto.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Cores disponíveis para escolha. Vivem no banco porque o enunciado avisa
+/// que a lista pode mudar depois — trocar não deve exigir deploy de código.
+model Cor {
+  id       String    @id @default(uuid()) @db.Uuid
+  slug     String    @unique @db.VarChar(40)
+  nome     String    @db.VarChar(60)
+  hex      String    @db.VarChar(7)
+  ordem    Int
+  ativa    Boolean   @default(true)
+  clientes Cliente[]
+
+  @@index([ativa, ordem])
+  @@map("cores")
+}
+
+/// Cadastro do cliente. CPF e e-mail são únicos: é o que garante o
+/// "preencher uma única vez" do enunciado, no banco e não só na tela.
+model Cliente {
+  id           String   @id @default(uuid()) @db.Uuid
+  nomeCompleto String   @map("nome_completo") @db.VarChar(120)
+  cpf          String   @unique @db.VarChar(11)
+  email        String   @unique @db.VarChar(160)
+  observacoes  String?  @db.VarChar(500)
+  corId        String   @map("cor_id") @db.Uuid
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+
+  // Restrict: uma cor que já foi escolhida por alguém não pode sumir do
+  // histórico. Para tirá-la de circulação existe o campo `ativa`.
+  cor Cor @relation(fields: [corId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([corId])
+  @@map("clientes")
+}
