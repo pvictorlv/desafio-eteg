@@ -1,0 +1,30 @@
+/*
+ * Tela de falha do LimiteDeErro. Usa os mesmos tokens do resto: mesmo quando
+ * quebra, a página continua sendo a mesma página.
+ */
+
+.falha {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap-campo);
+  max-width: 44ch;
+  margin-inline: auto;
+  padding: var(--gap-secao) var(--gap-pagina);
+}
+
+/* Dentro do painel o espaçamento externo já vem do próprio painel. */
+.falha[data-compacto] {
+  padding: 0;
+  margin-inline: 0;
+}
+
+.falha__titulo {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.falha__texto {
+  color: var(--tinta-media);
+}
