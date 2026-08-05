@@ -13,6 +13,6 @@
     "@desafio-eteg/contratos": "workspace:*",
     "@playwright/test": "^1.62.1",
     "@types/node": "^24.0.0",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   }
 }
