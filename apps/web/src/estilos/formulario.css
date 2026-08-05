@@ -1,0 +1,286 @@
+/*
+ * Formulário. Cantos retos em tudo, exceto nas amostras de cor — os sete
+ * círculos são a única forma curva da tela, e é isso que faz o olho ir neles.
+ */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-bloco);
+}
+
+.formulario__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-campo);
+  padding-top: var(--gap-curto);
+  border-top: 1px solid var(--linha);
+}
+
+.formulario__aviso-legal {
+  font-size: var(--corpo-apoio);
+  color: var(--tinta-fraca);
+  max-width: 32ch;
+}
+
+/* ------------------------------------------------------------ aviso geral */
+
+.aviso {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: var(--gap-campo);
+  border: 1.5px solid var(--critico);
+  border-left-width: 4px;
+  background-color: var(--critico-suave);
+  font-size: var(--corpo-apoio);
+  animation: surgir var(--duracao-media) var(--curva);
+}
+
+.aviso__titulo {
+  color: var(--critico);
+}
+
+/* ----------------------------------------------------------------- campo */
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-curto);
+}
+
+.campo__rotulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-curto);
+}
+
+.campo__entrada {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  background-color: transparent;
+  color: var(--tinta);
+  border: 1.5px solid var(--contorno-campo);
+  border-radius: 0;
+  font-size: var(--corpo-destaque);
+  transition:
+    border-color var(--duracao-curta) ease,
+    background-color var(--duracao-curta) ease;
+}
+
+.campo__entrada::placeholder {
+  color: var(--tinta-fraca);
+  opacity: 0.75;
+}
+
+.campo__entrada:hover:not(:disabled) {
+  border-color: var(--tinta-fraca);
+}
+
+.campo__entrada:focus {
+  border-color: var(--tinta);
+}
+
+.campo__entrada:focus-visible {
+  outline-offset: 2px;
+}
+
+/* Além da cor, a borda esquerda engrossa: quem não distingue vermelho ainda
+   vê que o campo mudou de forma. */
+.campo__entrada[aria-invalid='true'] {
+  border-color: var(--critico);
+  border-left-width: 4px;
+  background-color: var(--critico-suave);
+}
+
+.campo__entrada--mono {
+  font-family: var(--fonte-mono);
+  letter-spacing: 0.06em;
+}
+
+.campo__entrada--longo {
+  min-height: 6.5rem;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.campo__dica,
+.campo__contador {
+  font-size: var(--corpo-apoio);
+  color: var(--tinta-fraca);
+}
+
+.campo__contador {
+  font-family: var(--fonte-mono);
+  align-self: flex-end;
+  font-variant-numeric: tabular-nums;
+}
+
+.campo__erro {
+  font-size: var(--corpo-apoio);
+  color: var(--critico);
+  font-weight: 600;
+}
+
+/* -------------------------------------------------------- seletor de cor */
+
+.cores {
+  border: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-campo);
+}
+
+/* A largura mínima é apertada o bastante para as sete cores caberem em uma
+   linha só no painel, e o `auto-fit` reflui sozinho no celular — ou quando a
+   lista deixar de ter sete. */
+.cores__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(3.5rem, 1fr));
+  gap: var(--gap-campo) var(--gap-curto);
+}
+
+.cor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-curto);
+  cursor: pointer;
+  text-align: center;
+}
+
+/* Some da tela mas continua no fluxo de tabulação: a navegação por setas
+   entre rádios é do navegador, e trocar isso por divs custaria esse ganho. */
+.cor__entrada {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cor__amostra {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  /* Contorno interno para o amarelo não se dissolver no papel. */
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 14%);
+  transition:
+    transform var(--duracao-curta) var(--curva),
+    box-shadow var(--duracao-curta) var(--curva);
+}
+
+.cor:hover .cor__amostra {
+  transform: scale(1.08);
+}
+
+/* Selecionado: anel de tinta com folga, e o nome em negrito logo abaixo.
+   São dois sinais além da cor, que aqui não pode ser o único indicador. */
+.cor__entrada:checked + .cor__amostra {
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 14%),
+    0 0 0 3px var(--superficie),
+    0 0 0 5px var(--tinta);
+}
+
+.cor__entrada:focus-visible + .cor__amostra {
+  outline: 2px solid var(--tinta);
+  outline-offset: 5px;
+}
+
+.cor__nome {
+  font-size: var(--corpo-apoio);
+  color: var(--tinta-media);
+  line-height: 1.2;
+}
+
+.cor__entrada:checked ~ .cor__nome {
+  color: var(--tinta);
+  font-weight: 700;
+}
+
+/* Espaço reservado enquanto a lista chega, para o painel não encolher. */
+.cor__amostra--esqueleto {
+  border: 1.5px dashed var(--linha);
+  box-shadow: none;
+  animation: pulsar 1.4s ease-in-out infinite;
+}
+
+@keyframes pulsar {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.cores__recuperacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-campo);
+  padding: var(--gap-campo);
+  border: 1.5px solid var(--critico);
+  background-color: var(--critico-suave);
+  font-size: var(--corpo-apoio);
+}
+
+/* ---------------------------------------------------------------- botões */
+
+.botao {
+  padding: 0.85rem 2rem;
+  background-color: var(--tinta);
+  color: var(--papel);
+  border: 1.5px solid var(--tinta);
+  border-radius: 0;
+  font-size: var(--corpo-apoio);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 4px 4px 0 var(--sombra);
+  transition:
+    transform var(--duracao-curta) var(--curva),
+    box-shadow var(--duracao-curta) var(--curva);
+}
+
+.botao:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--sombra);
+}
+
+.botao:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--sombra);
+}
+
+/* "Enviando…" não é um controle desativado qualquer: é o único indicador de
+   progresso da tela, e precisa ser legível. `opacity` no elemento inteiro
+   compunha o texto e o fundo juntos e derrubava o contraste para 3,8:1;
+   trocar só a cor de fundo mantém 6,3:1. */
+.botao:disabled {
+  background-color: var(--tinta-media);
+  border-color: var(--tinta-media);
+  cursor: progress;
+  transform: none;
+  box-shadow: none;
+}
+
+.botao--discreto {
+  background-color: transparent;
+  color: var(--tinta);
+  box-shadow: none;
+  padding: 0.5rem 1rem;
+}
+
+.botao--discreto:hover:not(:disabled) {
+  background-color: var(--realce);
+  transform: none;
+  box-shadow: none;
+}
+
+@media (width < 30rem) {
+  .botao {
+    width: 100%;
+  }
+}

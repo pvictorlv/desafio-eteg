@@ -1,8 +1,11 @@
 import { z } from 'zod';
 
 /**
- * Códigos estáveis de erro de negócio. O front depende deles para decidir em
- * qual campo mostrar a mensagem, então mudá-los é breaking change de contrato.
+ * Códigos estáveis de erro de negócio. Mudá-los é breaking change de contrato.
+ *
+ * O front usa o código para decidir se o `detail` da resposta pode aparecer na
+ * tela: só os erros de negócio têm mensagem escrita para o usuário final. Em
+ * qual campo destacar quem decide é o `campo`, logo abaixo.
  */
 export const CODIGOS_DE_ERRO = {
   DADOS_INVALIDOS: 'DADOS_INVALIDOS',
