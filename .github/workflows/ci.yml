@@ -68,7 +68,7 @@ jobs:
       # TypeScript do zero a cada execução. A tag é a mesma que o compose
       # espera, então o `up` abaixo encontra a imagem pronta.
       - name: Constrói a imagem
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           load: true
