@@ -19,6 +19,12 @@ updates:
       desenvolvimento:
         dependency-type: development
         update-types: [minor, patch]
+    ignore:
+      # O @types/node acompanha a major do runtime, e o runtime está em 24
+      # (veja o .nvmrc). Tipagem à frente do runtime compila métodos que não
+      # existem em produção — o erro só aparece quando alguém chama.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
     commit-message:
       prefix: chore
       include: scope
