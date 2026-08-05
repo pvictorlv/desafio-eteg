@@ -61,7 +61,7 @@ jobs:
       # O teste sorteia um CPF com o validador do contrato compilado.
       - run: pnpm --filter @desafio-eteg/contratos build
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
       # Constrói fora do compose só para poder reaproveitar o cache do
       # GitHub — o `--build` do compose refaz install e os três builds de
