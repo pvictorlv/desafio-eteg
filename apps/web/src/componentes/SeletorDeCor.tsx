@@ -1,4 +1,5 @@
 import type { Cor } from '@desafio-eteg/contratos';
+import { useEffect, useRef } from 'react';
 import type { UseFormRegisterReturn } from 'react-hook-form';
 
 const CORES_NO_ESQUELETO = 7;
@@ -33,6 +34,19 @@ export function SeletorDeCor({
   const idDaLegenda = 'cores-legenda';
   const idDoErro = 'cores-erro';
 
+  const primeiraCor = useRef<HTMLInputElement | null>(null);
+  const pediuDeNovo = useRef(false);
+
+  // Quem clicou em "Tentar novamente" está com o foco num botão que desaparece
+  // assim que as cores chegam — e o foco cairia no body. Levá-lo para a
+  // primeira cor entrega a pessoa exatamente onde ela parou.
+  useEffect(() => {
+    if (pediuDeNovo.current && !carregando && !falhou) {
+      pediuDeNovo.current = false;
+      primeiraCor.current?.focus();
+    }
+  }, [carregando, falhou]);
+
   return (
     <fieldset
       className="cores"
@@ -49,7 +63,14 @@ export function SeletorDeCor({
       {falhou ? (
         <div className="cores__recuperacao" role="alert">
           <span>Não foi possível carregar as cores disponíveis.</span>
-          <button type="button" className="botao botao--discreto" onClick={aoTentarNovamente}>
+          <button
+            type="button"
+            className="botao botao--discreto"
+            onClick={() => {
+              pediuDeNovo.current = true;
+              aoTentarNovamente();
+            }}
+          >
             Tentar novamente
           </button>
         </div>
@@ -64,13 +85,20 @@ export function SeletorDeCor({
                   <span key={indice} className="cor__amostra cor__amostra--esqueleto" />
                 )),
               ]
-            : cores.map((cor) => (
+            : cores.map((cor, indice) => (
                 <label className="cor" key={cor.id}>
                   <input
                     className="cor__entrada"
                     type="radio"
                     value={cor.id}
                     {...registro}
+                    ref={(elemento) => {
+                      registro.ref(elemento);
+
+                      if (indice === 0) {
+                        primeiraCor.current = elemento;
+                      }
+                    }}
                     onChange={(evento) => {
                       void registro.onChange(evento);
                       aoMarcar(cor.id);

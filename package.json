@@ -6,13 +6,14 @@
   "description": "Cadastro de clientes - desafio tecnico ETEG",
   "packageManager": "pnpm@9.12.0",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "scripts": {
     "build": "pnpm -r build",
     "dev": "pnpm -r --parallel dev",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @desafio-eteg/e2e e2e",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

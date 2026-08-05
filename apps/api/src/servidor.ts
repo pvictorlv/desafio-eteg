@@ -10,6 +10,7 @@ import type { Banco } from './infra/banco.js';
 import { pluginDeBanco } from './plugins/banco.js';
 import { pluginDeDocumentacao } from './plugins/documentacao.js';
 import { pluginDeErros } from './plugins/erros.js';
+import { pluginDeEstaticos } from './plugins/estaticos.js';
 import { pluginDeObservabilidade } from './plugins/observabilidade.js';
 import { pluginDeSeguranca } from './plugins/seguranca.js';
 import { criarRepositorioDeClientes } from './repositorios/clientes.js';
@@ -85,7 +86,7 @@ export async function criarServidor({ ambiente, banco }: OpcoesDoServidor) {
   // consegue coletar os esquemas de cada uma.
   await app.register(pluginDeDocumentacao);
 
-  // Composition root: as dependências são montadas aqui e injetadas nas
+  // As dependências são montadas aqui, num lugar só, e entregues prontas às
   // rotas. Nenhuma camada instancia a de baixo por conta própria, o que
   // deixa qualquer uma substituível em teste.
   const servicoDeCores = criarServicoDeCores(criarRepositorioDeCores(banco));
@@ -97,6 +98,13 @@ export async function criarServidor({ ambiente, banco }: OpcoesDoServidor) {
   await app.register(rotasDeSaude);
   await app.register(rotasDeCores, { servicoDeCores });
   await app.register(rotasDeClientes, { servicoDeClientes });
+
+  // Por último: o desvio da SPA é um curinga, e registrá-lo antes das rotas
+  // deixaria a intenção pior de ler, ainda que o roteador prefira o caminho
+  // mais específico de qualquer forma.
+  if (ambiente.DIRETORIO_DO_FRONT) {
+    await app.register(pluginDeEstaticos, { diretorio: ambiente.DIRETORIO_DO_FRONT });
+  }
 
   return app;
 }

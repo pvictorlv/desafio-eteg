@@ -10,11 +10,13 @@
     "build": "prisma generate && tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx src/comandos/popularCores.ts"
   },
   "dependencies": {
     "@desafio-eteg/contratos": "workspace:*",
@@ -31,13 +33,15 @@
     "fastify": "^5.11.2",
     "fastify-plugin": "^6.0.0",
     "fastify-type-provider-zod": "^7.0.0",
+    "prisma": "^7.9.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "^12.1.0",
     "@types/node": "^24.0.0",
     "pino-pretty": "^13.1.2",
-    "prisma": "^7.9.1",
     "tsx": "^4.23.5",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   }
 }

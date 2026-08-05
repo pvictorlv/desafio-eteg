@@ -1,4 +1,24 @@
 services:
+  # A aplicacao inteira: API e tela na mesma porta, como vai para producao.
+  # Para desenvolver com recarregamento a quente, suba so o banco
+  # (`docker compose up -d banco`) e rode `pnpm dev` fora do container.
+  app:
+    build:
+      context: .
+    image: desafio-eteg:local
+    container_name: eteg-app
+    restart: unless-stopped
+    depends_on:
+      banco:
+        # Espera o healthcheck do banco: o entrypoint aplica as migracoes
+        # antes de subir e falharia contra um Postgres ainda inicializando.
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-eteg}:${POSTGRES_PASSWORD:-eteg}@banco:5432/${POSTGRES_DB:-eteg}?schema=public
+      NIVEL_DE_LOG: ${NIVEL_DE_LOG:-info}
+    ports:
+      - '${APP_PORT:-8080}:3000'
+
   banco:
     image: postgres:17-alpine
     container_name: eteg-postgres

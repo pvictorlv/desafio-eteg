@@ -23,6 +23,12 @@ const esquemaAmbiente = z.object({
 
   NIVEL_DE_LOG: z.enum(NIVEIS_DE_LOG).default('info'),
 
+  /**
+   * Diretório da SPA compilada, servida pela própria API. É o que faz a
+   * imagem única. Ausente em desenvolvimento, onde quem serve a tela é o Vite.
+   */
+  DIRETORIO_DO_FRONT: z.string().min(1).optional(),
+
   /** Opcional: se ausente, o envio de erros para o Sentry fica desligado. */
   SENTRY_DSN: z.string().optional(),
 });

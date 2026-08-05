@@ -6,7 +6,6 @@ const TTL_PADRAO_MS = 5 * 60 * 1000;
 export interface ServicoDeCores {
   listar(): Promise<Cor[]>;
   existe(id: string): Promise<boolean>;
-  invalidarCache(): void;
 }
 
 /**
@@ -50,10 +49,6 @@ export function criarServicoDeCores(
     async existe(id: string): Promise<boolean> {
       const cores = await listar();
       return cores.some((cor) => cor.id === id);
-    },
-
-    invalidarCache(): void {
-      cache = null;
     },
   };
 }

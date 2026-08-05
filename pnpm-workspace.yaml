@@ -1,3 +1,6 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  # Fica fora de apps/ por não ser aplicação: testa as duas por fora, pelo
+  # navegador, sem nada dentro delas saber que existe.
+  - 'e2e'

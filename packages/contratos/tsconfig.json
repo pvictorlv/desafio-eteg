@@ -1,8 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist"
+    "noEmit": true
   },
-  "include": ["src/**/*.ts"]
+  // Os testes entram aqui para o editor e o ESLint enxergarem tudo. O que vai
+  // para dist está em tsconfig.build.json.
+  "include": ["src/**/*.ts", "testes/**/*.ts"]
 }
