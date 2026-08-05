@@ -24,15 +24,15 @@ export const pluginDeEstaticos = fp(
       // o resto do caminho livre para o desvio da SPA, logo abaixo. Com o
       // curinga ligado seriam duas rotas `/*` disputando a mesma requisição.
       wildcard: false,
-      // O cache é decidido arquivo a arquivo logo abaixo. Deixar o padrão
-      // ligado faria ele sobrescrever o que o `setHeaders` acabou de definir.
+      // O cache é decidido arquivo a arquivo logo abaixo, e não pelo padrão
+      // do plugin.
       cacheControl: false,
       setHeaders: (resposta, caminho) => {
         // O nome dos arquivos do bundle carrega o hash do conteúdo: mudou o
         // conteúdo, mudou o nome. Guardá-los para sempre é seguro.
         // O index.html não tem hash — é ele que aponta para os demais, e um
         // cache longo deixaria o navegador preso na versão anterior.
-        resposta.setHeader(
+        resposta.header(
           'cache-control',
           caminho.endsWith(ARQUIVO_DE_ENTRADA)
             ? 'no-cache'
