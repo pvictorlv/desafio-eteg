@@ -6,7 +6,8 @@ Um formulário coleta **nome completo, CPF, e-mail, cor preferida e observaçõe
 e grava em Postgres. Cada CPF e cada e-mail podem ser cadastrados **uma única
 vez**, e quem preenche recebe a confirmação na hora.
 
-> Estado atual: API pronta. O formulário web vem em seguida.
+> Estado atual: API e formulário web prontos. Faltam os testes automatizados e
+> a imagem Docker.
 
 ## Stack
 
@@ -15,6 +16,9 @@ vez**, e quem preenche recebe a confirmação na hora.
 | Monorepo | pnpm workspaces             | Front, API e contrato no mesmo repositório, como o desafio pede     |
 | Contrato | Zod em `packages/contratos` | Uma regra de validação só, usada pelo formulário e pela API         |
 | API      | Fastify 5 + TypeScript      | Tipagem ponta a ponta nas rotas e OpenAPI gerado do próprio esquema |
+| Front    | React 19 + Vite             | SPA estática, que a própria API vai servir em produção              |
+| Formul.  | React Hook Form + Zod       | O resolver é o mesmo esquema que a rota valida                      |
+| Dados    | TanStack Query              | Cache das cores e controle do envio, sem repetição automática       |
 | Banco    | Postgres 17 + Prisma 7      | Migrações versionadas; a versão 7 dispensa engine binária           |
 
 ## Como rodar
@@ -35,7 +39,17 @@ pnpm seed            # cadastra as sete cores do arco-íris
 pnpm dev             # API em http://localhost:3000
 ```
 
-A documentação interativa fica em <http://localhost:3000/docs>.
+Com a API no ar, em outro terminal:
+
+```bash
+cd apps/web
+pnpm dev             # formulário em http://localhost:5173
+```
+
+O Vite faz proxy de `/api` para a porta 3000, então o front chama a mesma
+origem que usará em produção e o navegador nem passa por CORS.
+
+A documentação interativa da API fica em <http://localhost:3000/docs>.
 
 ## Endpoints
 
@@ -66,10 +80,34 @@ divergirem sem quebrar o build.
 **Dado pessoal não vai para o log.** Nome, CPF e e-mail são redigidos na origem.
 Log sai da máquina; depois que vazou, some com dificuldade.
 
+**O front decide pelo `codigo`, não pelo texto.** Um `409` chega com o campo
+culpado no problem+json, e é esse campo que o formulário destaca. Procurar a
+palavra "CPF" na mensagem quebraria na primeira vez que alguém melhorasse a
+redação de um erro no servidor.
+
+**O envio não é repetido sozinho.** Leituras podem ser tentadas de novo depois
+de uma falha de rede; o cadastro, não. Uma repetição automática depois de um
+timeout grava duas vezes ou devolve um `409` que a pessoa não provocou.
+
+## O formulário
+
+Uma tela só. O CPF ganha máscara enquanto se digita e viaja sem ela; as cores
+vêm de `GET /api/cores` e alimentam tanto os botões quanto a régua colorida do
+topo. Enviado com sucesso, o formulário **sai da tela** e dá lugar à
+confirmação com o protocolo — em vez de continuar preenchido, convidando a um
+segundo envio.
+
+Acessibilidade entra como requisito, não como enfeite: rótulo ligado a cada
+campo, erro anunciado por `role="alert"`, foco levado ao primeiro campo
+inválido, navegação por setas entre as cores, contraste conferido nos dois
+temas e movimento desligado para quem pede `prefers-reduced-motion`. A cor
+escolhida nunca é sinalizada só por cor — há anel e negrito junto.
+
 ## Estrutura
 
 ```
 apps/api            API Fastify (rotas -> serviços -> repositórios)
+apps/web            SPA React (Vite), consome a API
 packages/contratos  Esquemas Zod e validação de CPF compartilhados
 ```
 
