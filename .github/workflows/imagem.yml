@@ -32,7 +32,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - id: etiquetas
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRO }}/${{ github.repository }}
           # `latest` acompanha a main; a tag semântica fixa uma versão para
