@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { ProvedorDeDados } from './api/ProvedorDeDados';
 import './estilos/fontes.css';
 import './estilos/base.css';
 
@@ -12,6 +13,8 @@ if (!raiz) {
 
 createRoot(raiz).render(
   <StrictMode>
-    <App />
+    <ProvedorDeDados>
+      <App />
+    </ProvedorDeDados>
   </StrictMode>,
 );
