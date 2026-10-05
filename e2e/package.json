@@ -11,8 +11,8 @@
   },
   "devDependencies": {
     "@desafio-eteg/contratos": "workspace:*",
-    "@playwright/test": "^1.62.1",
-    "@types/node": "^24.0.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^24.19.1",
     "typescript": "^6.0.3"
   }
 }
